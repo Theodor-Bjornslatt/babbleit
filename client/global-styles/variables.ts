@@ -26,7 +26,7 @@ export const fontSizes = {
   large: '48px',
   extraLarge: '60px',
   extraExtraLarge: '72px'
-}
+} as const                
 
 export const lineHeights = {
   extraExtraSmall: '36px',
@@ -36,7 +36,7 @@ export const lineHeights = {
   large: '72px',
   extraLarge: '90px',
   extraExtraLarge: '108px',
-}
+} as const
 
 export const fontWeights = {
   light: 300,
@@ -44,17 +44,17 @@ export const fontWeights = {
   medium: 500,
   semiBold: 600,
   bold: 700
-}
+} as const                 
 
 export const borderRadiuses = {
   small: '15px',
   medium: '32px',
   large: '65px'
-}
+} as const
 
 export const boxShadows = {
   small: '0px 4px 4px 0px #00000040'
-}
+} as const
 
 export const sizes = {
   desktopWide: 1600,
@@ -62,5 +62,5 @@ export const sizes = {
   tablet: 1024,
   mobile: 768,
   mobileSmall: 425
-}
+} as const
 
