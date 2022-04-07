@@ -1,7 +1,9 @@
 const {
-  MONGO_HOST = 'localhost',
-  MONGO_PORT = 27017,
-  MONGO_DATABASE = 'babbelit'
+  MONGO_USERNAME = 'God',
+  MONGO_PASSWORD = 'password',
+  MONGO_DATABASE = 'babbleit'
 } = process.env
 
-export const MONGO_URI = `mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`
+export const MONGO_URI = `mongodb+srv://${MONGO_USERNAME}:${encodeURIComponent(
+  MONGO_PASSWORD
+)}@babbleitcluster.gmgdd.mongodb.net/${MONGO_DATABASE}?retryWrites=true&w=majority`

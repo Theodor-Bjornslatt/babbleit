@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import { catchAsync } from '../../middleware'
-import ExampleController from '../controller/example.controller'
+import { ExampleController } from '../controller'
 
 const router = Router()
 

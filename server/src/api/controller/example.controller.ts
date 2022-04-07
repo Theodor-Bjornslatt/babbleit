@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
 
-import { getHello } from '../service'
+import { ExampleService } from '../service'
 
 const apiGetHello = async (_: Request, res: Response) => {
-  const hello = await getHello()
+  const hello = await ExampleService.getHello()
   res.json(hello)
 }
 
