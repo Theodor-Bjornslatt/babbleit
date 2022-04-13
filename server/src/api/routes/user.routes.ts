@@ -17,5 +17,6 @@ router
     validateRequest('userUpdate'),
     catchAsync(UserController.updateFields)
   )
+  .delete(catchAsync(UserController.deleteMyAccount))
 
 export default router
