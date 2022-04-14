@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 
 import { Unauthorized } from '../../errors'
 import { createResponseMessage } from '../../utility'
+import destroySession from '../../utility/destroySession'
 import UserService from '../service/user.service'
 
 const getWhoAmI = async (req: Request, res: Response) => {
@@ -34,15 +35,12 @@ const updateFields = async (req: Request, res: Response) => {
 }
 
 const deleteMyAccount = async (req: Request, res: Response) => {
-  if (!req.session.userId) {
-    res.json({ message: 'Cannot delete, not logged in' })
-    return
-  }
-
   const userID = req.session.userId
-  req.session.destroy
 
-  res.clearCookie('sid').json(await UserService.deleteUserById(userID))
+  if (!userID) return
+
+  destroySession(req, res)
+  res.json(await UserService.deleteUserById(userID))
 }
 
 const userController = {
