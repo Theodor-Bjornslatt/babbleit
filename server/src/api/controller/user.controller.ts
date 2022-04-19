@@ -39,8 +39,10 @@ const deleteMyAccount = async (req: Request, res: Response) => {
 
   if (!userID) return
 
-  destroySession(req, res)
-  res.json(await UserService.deleteUserById(userID))
+  await destroySession(req, res)
+
+  const emailOfDeletedUser = UserService.deleteUserById(userID)
+  res.json(createResponseMessage('Succesfully deleted: ' + emailOfDeletedUser))
 }
 
 const userController = {

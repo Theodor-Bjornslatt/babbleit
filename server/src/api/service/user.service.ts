@@ -1,7 +1,7 @@
 import { Types } from 'mongoose'
 
 import { NotFound } from '../../errors'
-import { UpdateableUserFields, UserData } from '../../types'
+import { UpdateableUserFields, UserData, UserDocument } from '../../types'
 import { hashPassword } from '../../utility'
 import { AdminModel, UserModel } from '../model'
 
@@ -46,6 +46,10 @@ const updateFields = async (
   return true
 }
 
+/* 
+TODO  - when all services has a delete funtion: 
+When we remove the user, we should also remove the communities they are admin of, and remove them from the collection (userCommunities) that should save their memberships, as well as remove their memberships from the community itself
+*/
 const deleteUserById = async (userId: string): Promise<string> => {
   const user = await UserModel.findByIdAndRemove(userId)
 
@@ -53,7 +57,7 @@ const deleteUserById = async (userId: string): Promise<string> => {
     throw new NotFound('User does not exist')
   }
 
-  return `Deleted account: ${user._doc.email}`
+  return user._doc.email
 }
 
 const UserService = {
