@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 
 import { AuthService } from '../service'
+import destroySession from '../../utility/destroySession'
+import { createResponseMessage } from '../../utility/responseMessage'
 
 const apiLoginUser = async (req: Request, res: Response) => {
   const user = await AuthService.loginUser(req.body)
@@ -16,9 +18,16 @@ const apiRegisterUser = async (req: Request, res: Response) => {
   res.json({ user })
 }
 
+const apiLogoutUser = async (req: Request, res: Response) => {
+  if (!req.session) return
+  await destroySession(req, res)
+  res.json(createResponseMessage('Successfully logged out'))
+}
+
 const authController = {
   apiRegisterUser,
-  apiLoginUser
+  apiLoginUser,
+  apiLogoutUser
 }
 
 export default authController

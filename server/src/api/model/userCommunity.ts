@@ -14,6 +14,10 @@ const userCommunitySchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'community',
         required: [true, 'CommunityId must be provided']
+      },
+      communityTitle: {
+        type: String,
+        required: [true, 'CommunityTitle must be provided']
       }
     }
   ]

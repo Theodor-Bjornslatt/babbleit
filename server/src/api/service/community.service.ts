@@ -2,14 +2,17 @@ import { Types } from 'mongoose'
 
 import { Unauthorized, NotFound } from '../../errors'
 import {
+  Community,
   CommunityData,
-  CommunityMemberJoin,
   CommunityRegistration,
   CommunitySelect,
-  CommunityWithMembers,
   Role
 } from '../../types'
-import { CommunityAdminModel, CommunityModel } from '../model'
+import {
+  CommunityAdminModel,
+  CommunityModel,
+  UserCommunityModel
+} from '../model'
 
 async function saveNewCommunity(
   newCommunity: CommunityRegistration,
@@ -25,14 +28,14 @@ async function saveNewCommunity(
   const savedCommunity = await community.save()
 
   const {
-    _id: id,
+    _id,
     title: savedTitle,
     description: savedDescription
   } = savedCommunity._doc
 
   const adminRole: Role = {
     role: 'admin',
-    communityId: id
+    communityId: _id
   }
 
   await CommunityAdminModel.findOneAndUpdate(
@@ -43,17 +46,27 @@ async function saveNewCommunity(
     { upsert: true }
   )
 
-  return { id, title: savedTitle, description: savedDescription }
+  return {
+    id: _id.toString(),
+    title: savedTitle,
+    description: savedDescription
+  }
 }
 
-async function getAllCommunities(): Promise<CommunityData[]> {
-  const communities = await CommunityModel.find<CommunitySelect>({
-    isBlocked: false
-  }).select('id title description')
+async function getAllCommunities(
+  showBlockedCommunities = false
+): Promise<CommunityData[]> {
+  const communities = await CommunityModel.find<CommunitySelect>(
+    showBlockedCommunities
+      ? {}
+      : {
+          isBlocked: false
+        }
+  )
 
   return communities.map((community) => {
     return {
-      id: community._id,
+      id: community._id.toString(),
       title: community.title,
       description: community.description
     }
@@ -63,61 +76,28 @@ async function getAllCommunities(): Promise<CommunityData[]> {
 // TODO add posts to response
 async function findCommunityById(
   communityId: string,
-  showBlockedCommunities?: boolean
-): Promise<CommunityWithMembers> {
-  const result = await CommunityModel.aggregate<CommunityMemberJoin>([
+  showBlockedCommunities = false
+): Promise<Community> {
+  const result = await CommunityModel.aggregate<Community>([
     { $match: { _id: new Types.ObjectId(communityId) } },
     { $limit: 1 },
     {
-      $lookup: {
-        from: 'users',
-        localField: 'members.userId',
-        foreignField: '_id',
-        as: 'matchingUsers',
-        pipeline: [
-          {
-            $project: {
-              _id: 1,
-              username: 1
-            }
-          }
-        ]
-      }
-    },
-    {
       $project: {
+        _id: 0,
+        id: { $toString: '$_id' },
         title: 1,
         description: 1,
         isBlocked: 1,
         members: {
           $map: {
-            input: '$matchingUsers',
-            as: 'userMatch',
+            input: '$members',
             in: {
-              $mergeObjects: [
-                '$$userMatch',
-                {
-                  $arrayElemAt: [
-                    {
-                      $filter: {
-                        input: '$members',
-                        as: 'communityMembers',
-                        cond: {
-                          $eq: ['$$communityMembers.userId', '$$userMatch._id']
-                        }
-                      }
-                    },
-                    0
-                  ]
-                }
-              ]
+              userId: { $toString: '$$this.userId' },
+              username: '$$this.username'
             }
           }
         }
       }
-    },
-    {
-      $unset: ['members._id']
     }
   ])
 
@@ -131,26 +111,48 @@ async function findCommunityById(
     throw new Unauthorized('This community has been blocked by an admin')
   }
 
-  const communityResponse = {
-    id: community._id.toString(),
-    title: community.title,
-    description: community.description,
-    isBlocked: !!community.isBlocked,
-    members: community.members.map((member) => {
-      const { username, userId, isBlocked } = member
-      return { id: userId.toString(), username, isBlocked: !!isBlocked }
-    })
+  return community
+}
+
+async function deleteCommunityById(id: string) {
+  const userCommunityResult = await UserCommunityModel.updateMany(
+    {},
+    {
+      $pull: {
+        communities: {
+          communityId: new Types.ObjectId(id)
+        }
+      }
+    }
+  )
+
+  const communityResult = await CommunityModel.deleteOne({
+    _id: new Types.ObjectId(id)
+  })
+
+  const communityAdminResult = await CommunityAdminModel.updateMany(
+    {},
+    {
+      $pull: {
+        roles: {
+          communityId: new Types.ObjectId(id)
+        }
+      }
+    }
+  )
+
+  return {
+    isCommunityDeleted: communityResult.acknowledged,
+    isUserCommunityDeleted: userCommunityResult.acknowledged,
+    isCommunityAdminDeleted: communityAdminResult.acknowledged
   }
-
-  console.log('res', communityResponse)
-
-  return communityResponse
 }
 
 const CommunityService = {
   saveNewCommunity,
   getAllCommunities,
-  findCommunityById
+  findCommunityById,
+  deleteCommunityById
 }
 
 export default CommunityService

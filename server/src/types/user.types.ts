@@ -37,3 +37,8 @@ export type UpdateableUserFields = {
   username?: User['username']
   password?: User['password']
 }
+
+export type PublicUserFields = {
+  username: User['username']
+} & Id &
+  IsBlocked

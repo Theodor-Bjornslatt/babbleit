@@ -1,5 +1,3 @@
-import { Types } from 'mongoose'
-
 import { BadRequest, Unauthorized, Conflict } from '../../errors'
 import { UserData, UserLogin, UserRegistration } from '../../types'
 import { hashPassword } from '../../utility'
@@ -28,9 +26,14 @@ const registerNewUser = async ({
 
   const newUser = await user.save()
 
-  const { _id: id, username: savedUsername, email: savedEmail } = newUser._doc
+  const { _id, username: savedUsername, email: savedEmail } = newUser._doc
 
-  return { id, username: savedUsername, email: savedEmail, isAdmin: false }
+  return {
+    id: _id.toString(),
+    username: savedUsername,
+    email: savedEmail,
+    isAdmin: false
+  }
 }
 
 const loginUser = async ({ email, password }: UserLogin): Promise<UserData> => {
@@ -42,7 +45,7 @@ const loginUser = async ({ email, password }: UserLogin): Promise<UserData> => {
     throw new BadRequest('Bad credentials')
   }
 
-  const { _id: id, email: savedEmail, username, isBlocked } = user._doc
+  const { _id, email: savedEmail, username, isBlocked } = user._doc
 
   if (isBlocked) {
     throw new Unauthorized(
@@ -51,10 +54,10 @@ const loginUser = async ({ email, password }: UserLogin): Promise<UserData> => {
   }
 
   const admin = await AdminModel.exists({
-    userId: new Types.ObjectId(id)
+    userId: _id
   })
 
-  return { id, email: savedEmail, username, isAdmin: !!admin }
+  return { id: _id.toString(), email: savedEmail, username, isAdmin: !!admin }
 }
 
 const AuthService = {

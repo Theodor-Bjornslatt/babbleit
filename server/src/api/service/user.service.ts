@@ -1,7 +1,7 @@
 import { Types } from 'mongoose'
 
 import { NotFound } from '../../errors'
-import { UpdateableUserFields, UserData, UserDocument } from '../../types'
+import { UpdateableUserFields, UserData, PublicUserFields } from '../../types'
 import { hashPassword } from '../../utility'
 import { AdminModel, UserModel } from '../model'
 
@@ -14,19 +14,25 @@ const findUserById = async (
     throw new NotFound('User not found')
   }
 
-  const { _id: id, email, username, isBlocked } = user._doc
+  const { _id, email, username, isBlocked } = user._doc
 
   const admin = await AdminModel.exists({
-    userId: new Types.ObjectId(id)
+    userId: _id
   })
 
-  return { id, email, username, isAdmin: !!admin, isBlocked: !!isBlocked }
+  return {
+    id: _id.toString(),
+    email,
+    username,
+    isAdmin: !!admin,
+    isBlocked: !!isBlocked
+  }
 }
 
 const updateFields = async (
   _id: string,
   fieldsToUpdate: UpdateableUserFields
-) => {
+): Promise<boolean> => {
   const { password } = fieldsToUpdate
   let update = { ...fieldsToUpdate }
 
@@ -60,10 +66,29 @@ const deleteUserById = async (userId: string): Promise<string> => {
   return user._doc.email
 }
 
+const findUsers = async (
+  showBlockedUsers = false
+): Promise<PublicUserFields[]> => {
+  const users = await UserModel.find(showBlockedUsers ? {} : { isBlocked: 0 })
+    .select('_id isBlocked username')
+    .limit(10)
+    .skip(0)
+
+  return users.map((user) => {
+    const { _id, username, isBlocked } = user._doc
+    return {
+      id: _id.toString(),
+      username,
+      isBlocked
+    }
+  })
+}
+
 const UserService = {
   findUserById,
   updateFields,
-  deleteUserById
+  deleteUserById,
+  findUsers
 }
 
 export default UserService

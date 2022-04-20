@@ -1,6 +1,6 @@
 import Joi from 'joi'
 
-import { BadRequest } from '../errors/BadRequest'
+import { BadRequest } from '../../errors'
 
 export const ValidUser = {
   email: Joi.string()

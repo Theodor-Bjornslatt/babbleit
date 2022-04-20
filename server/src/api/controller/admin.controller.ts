@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 
 import { createResponseMessage } from '../../utility'
 import { BadRequest } from '../../errors'

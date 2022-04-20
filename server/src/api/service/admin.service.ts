@@ -1,4 +1,3 @@
-import { UserService } from '../service'
 import { UserModel } from '../model'
 
 const blockUserById = async (_id: string, isBlocked: number) => {

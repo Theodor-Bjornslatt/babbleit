@@ -22,11 +22,13 @@ const communitySchema = new Schema(
         userId: {
           type: Schema.Types.ObjectId,
           ref: 'user',
-          required: [true, 'User id must be provided']
+          required: [true, 'User id must be provided'],
+          unique: true
         },
-        isBlocked: {
-          type: Number,
-          default: 0
+        username: {
+          type: String,
+          required: [true, 'Username must be provided'],
+          unique: true
         }
       }
     ]

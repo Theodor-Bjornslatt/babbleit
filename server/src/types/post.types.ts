@@ -1,12 +1,16 @@
+import { Community } from '.'
+import { IsBlocked, MongoId } from './aggregate.types'
+import { User } from './user.types'
+
 export type Post = {
-  _id: string
-  userId: string
-  communityId: string
+  userId: User['_id']
+  username: User['username']
+  communityId: Community['_id']
   title: string
   content: string
-  isBlocked: number
   __v: number
-}
+} & MongoId &
+  IsBlocked
 
 export type PostDocument = {
   _doc: Post

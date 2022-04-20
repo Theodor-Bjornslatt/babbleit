@@ -9,6 +9,8 @@ import { UserController } from '../controller'
 
 const router = Router()
 
+router.route('/').get(catchAsync(UserController.getUsers))
+
 router
   .route('/me')
   .get(allowOnlyRegisteredUsers, catchAsync(UserController.getWhoAmI))

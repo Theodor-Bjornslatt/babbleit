@@ -45,10 +45,16 @@ const deleteMyAccount = async (req: Request, res: Response) => {
   res.json(createResponseMessage('Succesfully deleted: ' + emailOfDeletedUser))
 }
 
+const getUsers = async (req: Request, res: Response) => {
+  const users = await UserService.findUsers(req.session.isAdmin)
+  res.json({ users })
+}
+
 const userController = {
   getWhoAmI,
   updateFields,
-  deleteMyAccount
+  deleteMyAccount,
+  getUsers
 }
 
 export default userController

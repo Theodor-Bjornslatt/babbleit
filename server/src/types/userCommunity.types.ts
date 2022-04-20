@@ -1,14 +1,15 @@
 import { Document } from 'mongoose'
 
-import { Id } from '.'
+import { Community, User } from '.'
 
 export type UserCommunity = {
-  userId: Id['id']
+  userId: User['_id']
   communities: {
-    communityId: Id['id']
+    communityId: Community['_id']
+    communityTitle: string
   }[]
 }
 
 export type UserCommunityDocument = {
-  _doc: UserCommunityDocument
+  _doc: UserCommunity
 } & Document

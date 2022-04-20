@@ -8,8 +8,9 @@ export type CommunityRegistration = {
 }
 
 export type CommunityMember = {
-  userId: Id['id']
-} & IsBlocked
+  userId: User['_id']
+  username: User['username']
+}
 
 export type Community = {
   __v: number
@@ -27,15 +28,9 @@ export type CommunityData = Id & CommunityRegistration
 export type CommunitySelect = MongoId & CommunityRegistration
 
 export type JoinedMember = {
-  userId: Id['id']
+  userId: User['_id']
   username: User['username']
 } & IsBlocked &
-  MongoId
-
-export type CommunityMemberJoin = {
-  members: JoinedMember[]
-} & CommunityRegistration &
-  IsBlocked &
   MongoId
 
 export type MemberResponse = {
@@ -43,7 +38,7 @@ export type MemberResponse = {
 } & Id &
   Pick<User, 'username'>
 
-export type CommunityWithMembers = {
-  isBlocked: boolean
+export type CommunityAggregate = {
   members: MemberResponse[]
-} & CommunityRegistration
+} & CommunityRegistration &
+  Id
