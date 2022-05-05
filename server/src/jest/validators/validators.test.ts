@@ -1,8 +1,8 @@
 import mongoose from 'mongoose'
 
 import { JoiValidators } from '../../validation'
-import users from './approved.users.json'
-import notApprovedUsers from './non-approved.users.json'
+import { approvedTestUsers } from './approved.users'
+import { nonApprovedTestUsers } from './non-approved.users'
 
 const { MONGODB_HOST = 'localhost', MONGODB_PORT = '27017' } = process.env
 
@@ -15,13 +15,13 @@ afterAll(async () => {
   mongoose.disconnect()
 })
 
-test('Test of the validations from a user registation', async () => {
-  users.forEach(async (user) => {
+test('Validation a user registation', () => {
+  approvedTestUsers.forEach((user) => {
     const result = JoiValidators['registration'].validate(user)
     expect(result.error).toBeUndefined()
   })
 
-  notApprovedUsers.forEach(async (user) => {
+  nonApprovedTestUsers.forEach((user) => {
     const result = JoiValidators['registration'].validate(user)
     expect(result.error).toBeDefined()
   })
